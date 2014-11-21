@@ -1,6 +1,12 @@
+// Copyright Anton Bikineev 2014.
+// Use, modification and distribution are subject to the
+// Boost Software License, Version 1.0
+// (See accompanying file LICENSE_1_0.txt
+// or copy at http://www.boost.org/LICENSE_1_0.txt)
+
 import Darwin
 
-// swift doesn't have macro functions
+// swift doesn't have function-like macros
 // so the following boilerplate is inequitable
 
 public func acosh(x: Double) -> Double {

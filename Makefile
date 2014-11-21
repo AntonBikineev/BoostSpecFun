@@ -64,11 +64,11 @@ $(BOOST_MATH_TR1_LIBRARY_BINDING): $(FUNCTIONS) $(BOOST_MATH_TR1_LIBRARY_BINDING
 		$(CXX) -dynamiclib $^ -o $@
 
 $(SWIFT_SPEC_FUN_LIBRARY) : $(SWIFT_SPEC_FUN_SRC)
-		xcrun -sdk macosx swiftc -emit-library -emit-object $< -import-objc-header $(BOOST_MATH_BRIDGING_HEADER)
-		ar rcs $@ $(SWIFT_MODULE_NAME).o
+		xcrun -sdk macosx swiftc -c $< -import-objc-header $(BOOST_MATH_BRIDGING_HEADER)
+		ar rvs $@ $(SWIFT_MODULE_NAME).o
 
 $(SWIFT_SPEC_FUN_MODULE) : $(SWIFT_SPEC_FUN_SRC)
-		xcrun -sdk macosx swiftc -emit-module -import-objc-header $(BOOST_MATH_BRIDGING_HEADER) $< -module-name boost_spec_fun -module-link-name $(BOOST_MATH_TR1_LIBRARY_SONAME)
+		xcrun -sdk macosx swiftc -emit-module -import-objc-header $(BOOST_MATH_BRIDGING_HEADER) $< -module-name $(SWIFT_MODULE_NAME) -module-link-name $(BOOST_MATH_TR1_LIBRARY_SONAME)
 
 clean:
-		rm libboost_spec_fun.a boost_spec_fun.o boost_spec_fun.swiftdoc boost_spec_fun.swiftmodule $(BOOST_MATH_TR1_LIBRARY_BINDING) $(BOOST_MATH_TR1_LIBRARY_BINDING_SRC) $(FUNCTIONS)
+		rm libboost_spec_fun.a boost_spec_fun.o boost_spec_fun.swiftdoc boost_spec_fun.swiftmodule $(BOOST_MATH_TR1_LIBRARY_BINDING) $(BOOST_MATH_TR1_LIBRARY_BINDING_SRC)
