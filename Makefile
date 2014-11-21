@@ -1,15 +1,16 @@
 BOOST_MATH = 3rdparty/math
 BOOST_MATH_SRC = $(BOOST_MATH)/src/tr1
 
-BOOST_MATH_TR1_LIBRARY_SONAME = boost_math_tr1
-BOOST_MATH_TR1_LIBRARY = lib$(BOOST_MATH_TR1_LIBRARY_SONAME).dylib
+BOOST_MATH_TR1_LIBRARY_SONAME = boost_math_tr1_binding
+BOOST_MATH_TR1_LIBRARY_BINDING = lib$(BOOST_MATH_TR1_LIBRARY_SONAME).dylib
+BOOST_MATH_TR1_LIBRARY_BINDING_SRC = boost_math_tr1_binding.o
 
 BOOST_BUILD_DIR = $(BOOST_MATH)/build
 
 INCLUDES = -I$(BOOST_MATH_SRC)
-BOOST_MATH_BRIDGING_HEADER = $(BOOST_MATH)/include/boost/math/tr1.hpp
+BOOST_MATH_BRIDGING_HEADER = bridging_header.h
 
-CXXFLAGS = -static-libgcc -static-libstdc++ $(INCLUDES)
+CXXFLAGS = $(INCLUDES) #-static-libgcc -static-libstdc++
 
 FUNCTIONS = \
 		$(BOOST_MATH_SRC)/acosh.o \
@@ -55,19 +56,19 @@ FUNCTIONS = \
 SWIFT_MODULE_NAME = boost_spec_fun
 SWIFT_SPEC_FUN_SRC = $(SWIFT_MODULE_NAME).swift
 SWIFT_SPEC_FUN_MODULE = $(SWIFT_MODULE_NAME).swiftmodule
-SWIFT_SPEC_FUN_LIBRARY = $(SWIFT_MODULE_NAME).a
+SWIFT_SPEC_FUN_LIBRARY = lib$(SWIFT_MODULE_NAME).a
 
-all: $(BOOST_MATH_TR1_LIBRARY) $(SWIFT_SPEC_FUN_MODULE) $(SWIFT_SPEC_FUN_LIBRARY)
+all: $(BOOST_MATH_TR1_LIBRARY_BINDING) $(SWIFT_SPEC_FUN_LIBRARY) $(SWIFT_SPEC_FUN_MODULE) 
 
-$(BOOST_MATH_TR1_LIBRARY): $(FUNCTIONS)
+$(BOOST_MATH_TR1_LIBRARY_BINDING): $(FUNCTIONS) $(BOOST_MATH_TR1_LIBRARY_BINDING_SRC)
 		$(CXX) -dynamiclib $^ -o $@
 
-$(SWIFT_SPEC_FUN_MODULE) : $(SWIFT_SPEC_FUN_SRC)
-		xcrun -sdk macosx swiftc -emit-module -import-objc-header $(BOOST_MATH_BRIDGING_HEADER) -I $(BOOST_MATH)/include $<
-
 $(SWIFT_SPEC_FUN_LIBRARY) : $(SWIFT_SPEC_FUN_SRC)
-		xcrun -sdk macosx swiftc -c $< -import-objc-header $(BOOST_MATH_BRIDGING_HEADER) -I $(BOOST_MATH)/include
-		ar rvs $@ $(SWIFT_MODULE_NAME).o
+		xcrun -sdk macosx swiftc -emit-library -emit-object $< -import-objc-header $(BOOST_MATH_BRIDGING_HEADER)
+		ar rcs $@ $(SWIFT_MODULE_NAME).o
+
+$(SWIFT_SPEC_FUN_MODULE) : $(SWIFT_SPEC_FUN_SRC)
+		xcrun -sdk macosx swiftc -emit-module -import-objc-header $(BOOST_MATH_BRIDGING_HEADER) $< -module-name boost_spec_fun -module-link-name $(BOOST_MATH_TR1_LIBRARY_SONAME)
 
 clean:
-		rm boost_spec_fun.a boost_spec_fun.o boost_spec_fun.swiftdoc boost_spec_fun.swiftmodule libboost_math_tr1.dylib $(FUNCTIONS)
+		rm libboost_spec_fun.a boost_spec_fun.o boost_spec_fun.swiftdoc boost_spec_fun.swiftmodule $(BOOST_MATH_TR1_LIBRARY_BINDING) $(BOOST_MATH_TR1_LIBRARY_BINDING_SRC) $(FUNCTIONS)
